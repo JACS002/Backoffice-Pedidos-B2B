@@ -1,198 +1,252 @@
-# Sistema de Pedidos B2B - Microservicios
+# 🚀 Backoffice de Pedidos B2B
 
-Sistema completo de gestión de pedidos B2B compuesto por dos APIs REST (Customers y Orders) y un Lambda orquestador, utilizando MySQL como base de datos.
+Sistema de microservicios con arquitectura RESTful para gestión de clientes, productos y órdenes, con orquestación mediante AWS Lambda.
 
-## 📋 Estructura del Proyecto
+## 📋 Descripción
 
-```
-/
-├── customers-api/          # API de gestión de clientes
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── middlewares/
-│   │   ├── config/
-│   │   └── app.js
-│   ├── Dockerfile
-│   ├── openapi.yaml
-│   └── package.json
-├── orders-api/            # API de gestión de productos y órdenes
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── middlewares/
-│   │   ├── utils/
-│   │   ├── config/
-│   │   └── app.js
-│   ├── Dockerfile
-│   ├── openapi.yaml
-│   └── package.json
-├── lambda-orchestrator/   # Orquestador serverless
-│   ├── handler.js
-│   ├── serverless.yml
-│   └── package.json
-├── db/
-│   ├── schema.sql        # Esquema de base de datos
-│   └── seed.sql          # Datos iniciales
-├── docker-compose.yml
-└── README.md
+Este proyecto implementa un sistema completo de e-commerce utilizando microservicios independientes:
+
+- **Customers API**: Gestión de clientes con endpoint interno protegido
+- **Orders API**: Gestión de productos y órdenes con control de stock transaccional
+- **Lambda Orchestrator**: Orquestador serverless para flujos complejos
+
+## 🏗️ Arquitectura
 
 ```
+┌─────────────────────┐
+│  Lambda Orchestrator│ (Puerto 3003)
+│   Serverless HTTP   │
+└──────────┬──────────┘
+           │
+    ┌──────┴──────┐
+    ▼             ▼
+┌─────────┐   ┌─────────┐
+│Customers│   │ Orders  │
+│   API   │◄──┤   API   │
+│  :3001  │   │  :3002  │
+└────┬────┘   └────┬────┘
+     │             │
+     └─────┬───────┘
+           ▼
+    ┌────────────┐
+    │   MySQL    │
+    │  :3306     │
+    └────────────┘
+```
 
-## 🚀 Inicio Rápido
+## 🛠️ Tecnologías
 
-### Prerrequisitos
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Base de Datos**: MySQL 8.0
+- **Serverless**: Serverless Framework + Offline Plugin
+- **Testing**: Jest + Supertest
+- **Validación**: Zod
+- **Documentación**: OpenAPI 3.0 + Swagger UI
+- **Containerización**: Docker + Docker Compose
 
-- Docker y Docker Compose
-- Node.js 20+ (para desarrollo local del Lambda)
-- MySQL 8.0 (incluido en Docker Compose)
+## 📦 Requisitos Previos
+
+- Node.js >= 18.x
+- Docker & Docker Compose
+- npm o yarn
+
+## 🚀 Instalación
 
 ### 1. Clonar el repositorio
 
 ```bash
 git clone <repository-url>
-cd Node\ Backend
+cd "Node Backend"
 ```
 
-### 2. Configurar variables de entorno
-
-**Para Docker Compose:**
-
-Copia el archivo `.env.example` a `.env` en la raíz del proyecto:
+### 2. Instalar dependencias
 
 ```bash
-cp .env.example .env
+# Lambda Orchestrator
+cd ../lambda-orchestrator
+npm install
 ```
 
-El archivo `.env` ya contiene los valores por defecto. Puedes modificarlos según tus necesidades.
+### 3. Configurar variables de entorno
 
-**Para Lambda Orchestrator (desarrollo local):**
+El proyecto usa Docker con variables predefinidas. Para desarrollo local, las variables por defecto funcionan correctamente.
 
-```env
-PORT=3001
-DB_HOST=db
-DB_USER=root
-DB_PASS=root
-DB_NAME=challenges_db
-SERVICE_TOKEN=token_secreto_interno_123
-```
+## 🐳 Ejecución con Docker
 
-**Orders API:**
-
-```env
-PORT=3002
-DB_HOST=db
-DB_USER=root
-DB_PASS=root
-DB_NAME=challenges_db
-SERVICE_TOKEN=token_secreto_interno_123
-CUSTOMERS_API_URL=http://customers-api:3001
-```
-
-**Lambda Orchestrator:**
-
-```env
-CUSTOMERS_API_URL=http://localhost:3001
-ORDERS_API_URL=http://localhost:3002
-SERVICE_TOKEN=token_secreto_interno_123
-```
-
-### 3. Levantar servicios con Docker Compose
+### Iniciar todos los servicios
 
 ```bash
-# Construir imágenes
-docker-compose build
-
-# Iniciar servicios
 docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
 ```
 
-### 4. Verificar que los servicios están corriendo
+Esto iniciará:
+
+- MySQL (puerto 3306)
+- Customers API (puerto 3001)
+- Orders API (puerto 3002)
+
+### Verificar estado de los contenedores
 
 ```bash
-# Customers API
-curl http://localhost:3001/health
-
-# Orders API
-curl http://localhost:3002/health
-
-# Ver documentación interactiva con Swagger UI
-# Customers API: http://localhost:3001/api-docs
-# Orders API: http://localhost:3002/api-docs
+docker ps
 ```
 
-## 📡 APIs Disponibles
+### Crear las tablas (Migraciones)
+
+```bash
+cd customers-api
+npm run migrate
+```
+
+### Insertar datos de prueba (Seeds)
+
+```bash
+npm run seed
+```
+
+### Ver logs
+
+```bash
+# Todos los servicios
+docker-compose logs -f
+
+# Servicio específico
+docker-compose logs -f customers-api
+docker-compose logs -f orders-api
+```
+
+### Detener servicios
+
+```bash
+docker-compose down
+```
+
+## ⚡ Ejecución Local (Lambda Orchestrator)
+
+El Lambda Orchestrator se ejecuta fuera de Docker usando Serverless Offline:
+
+```bash
+cd lambda-orchestrator
+npm run dev
+```
+
+Esto iniciará el servidor en `http://localhost:3003`
+
+## 📚 Documentación API
+
+Cada servicio tiene su documentación interactiva con Swagger UI:
+
+- **Customers API**: http://localhost:3001/api-docs
+- **Orders API**: http://localhost:3002/api-docs
+
+## 🔌 Endpoints
 
 ### Customers API (Puerto 3001)
 
-**Endpoints públicos:**
+#### Públicos
 
-- `POST /customers` - Crear cliente
-- `GET /customers/:id` - Obtener cliente por ID
-- `GET /customers?search=&cursor=&limit=` - Buscar clientes (paginación cursor)
-- `PUT /customers/:id` - Actualizar cliente
-- `DELETE /customers/:id` - Eliminar cliente
-
-**Endpoints internos (requieren token):**
-
-- `GET /internal/customers/:id` - Validación de cliente (usado por Orders API)
-
-### Orders API (Puerto 3002)
-
-**Productos:**
-
-- `POST /products` - Crear producto
-- `GET /products/:id` - Obtener producto
-- `GET /products?search=&cursor=&limit=` - Buscar productos
-- `PATCH /products/:id` - Actualizar precio/stock
-
-**Órdenes:**
-
-- `POST /orders` - Crear orden (valida cliente, verifica stock, descuenta en transacción)
-- `GET /orders/:id` - Obtener orden con items
-- `GET /orders?status=&from=&to=&cursor=&limit=` - Buscar órdenes con filtros
-- `POST /orders/:id/confirm` - Confirmar orden (idempotente con X-Idempotency-Key)
-- `POST /orders/:id/cancel` - Cancelar orden (restaura stock según reglas)
-
-### Lambda Orchestrator (Puerto 3003 en local)
-
-**Endpoint:**
-
-- `POST /dev/orchestrator/create-and-confirm-order` - Orquesta creación y confirmación de pedidos
-
-## 🧪 Ejemplos de uso con cURL
-
-### 1. Crear un cliente
+**POST /customers** - Crear cliente
 
 ```bash
 curl -X POST http://localhost:3001/customers \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Juan Perez",
-    "email": "juan@test.com",
-    "phone": "+5550000"
+    "name": "Empresa ACME",
+    "email": "ops@acme.com",
+    "phone": "+59399999999"
   }'
 ```
 
-### 2. Crear un producto
+**GET /customers/:id** - Obtener cliente por ID
+
+```bash
+curl http://localhost:3001/customers/1
+```
+
+**GET /customers?search=&cursor=&limit=** - Buscar clientes con paginación
+
+```bash
+# Buscar por nombre
+curl "http://localhost:3001/customers?search=ACME&limit=10"
+
+# Con cursor para paginación
+curl "http://localhost:3001/customers?cursor=5&limit=10"
+```
+
+**PUT /customers/:id** - Actualizar cliente
+
+```bash
+curl -X PUT http://localhost:3001/customers/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Empresa ACME Actualizada",
+    "phone": "+59398888888"
+  }'
+```
+
+**DELETE /customers/:id** - Eliminar cliente
+
+```bash
+curl -X DELETE http://localhost:3001/customers/1
+```
+
+#### Internos (Requiere `Authorization: Bearer SERVICE_TOKEN`)
+
+**GET /internal/customers/:id** - Validar cliente para servicios internos
+
+```bash
+curl http://localhost:3001/internal/customers/1 \
+  -H "Authorization: Bearer token_secreto_interno_123"
+```
+
+### Orders API (Puerto 3002)
+
+#### Productos
+
+**POST /products** - Crear producto
 
 ```bash
 curl -X POST http://localhost:3002/products \
   -H "Content-Type: application/json" \
   -d '{
-    "sku": "PROD-004",
-    "name": "Mouse Inalámbrico",
-    "price_cents": 5000,
-    "stock": 50
+    "sku": "PROD-001",
+    "name": "Laptop Developer",
+    "price_cents": 150000,
+    "stock": 10
   }'
 ```
 
-### 3. Crear una orden
+**GET /products/:id** - Obtener producto
+
+```bash
+curl http://localhost:3002/products/1
+```
+
+**PATCH /products/:id** - Actualizar precio/stock
+
+```bash
+curl -X PATCH http://localhost:3002/products/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "price_cents": 160000,
+    "stock": 15
+  }'
+```
+
+**GET /products?search=&cursor=&limit=** - Buscar productos
+
+```bash
+# Buscar por nombre o SKU
+curl "http://localhost:3002/products?search=Laptop&limit=10"
+
+# Con paginación
+curl "http://localhost:3002/products?cursor=5&limit=10"
+```
+
+#### Órdenes
+
+**POST /orders** - Crear orden (valida cliente y descuenta stock)
 
 ```bash
 curl -X POST http://localhost:3002/orders \
@@ -208,33 +262,74 @@ curl -X POST http://localhost:3002/orders \
   }'
 ```
 
-### 4. Confirmar orden (idempotente)
+**GET /orders/:id** - Obtener orden con items
+
+```bash
+curl http://localhost:3002/orders/1
+```
+
+**GET /orders?status=&from=&to=&cursor=&limit=** - Listar órdenes con filtros
+
+```bash
+# Filtrar por estado
+curl "http://localhost:3002/orders?status=CREATED&limit=10"
+
+# Filtrar por rango de fechas
+curl "http://localhost:3002/orders?from=2026-01-01&to=2026-12-31&limit=10"
+
+# Combinar filtros
+curl "http://localhost:3002/orders?status=CONFIRMED&cursor=5&limit=10"
+```
+
+**POST /orders/:id/confirm** - Confirmar orden (idempotente con `X-Idempotency-Key`)
 
 ```bash
 curl -X POST http://localhost:3002/orders/1/confirm \
-  -H "Content-Type: application/json" \
-  -H "X-Idempotency-Key: confirm-order-1-abc123"
+  -H "X-Idempotency-Key: unique-key-123"
 ```
 
-### 5. Usar el Lambda Orchestrator (creación + confirmación en un solo paso)
+**POST /orders/:id/cancel** - Cancelar orden y restaurar stock
+
+```bash
+curl -X POST http://localhost:3002/orders/1/cancel
+```
+
+### Lambda Orchestrator (Puerto 3003)
+
+**POST /dev/orchestrator/create-and-confirm-order** - Crear y confirmar orden completa
+
+Flujo completo: valida cliente → crea orden → confirma orden → respuesta consolidada
+
+**Request:**
+
+```json
+{
+  "customer_id": 1,
+  "items": [
+    {
+      "product_id": 2,
+      "qty": 3
+    }
+  ],
+  "idempotency_key": "abc-123",
+  "correlation_id": "req-789"
+}
+```
+
+**Ejemplo con cURL:**
 
 ```bash
 curl -X POST http://localhost:3003/dev/orchestrator/create-and-confirm-order \
   -H "Content-Type: application/json" \
   -d '{
     "customer_id": 1,
-    "items": [
-      {
-        "product_id": 2,
-        "qty": 3
-      }
-    ],
+    "items": [{"product_id": 2, "qty": 3}],
     "idempotency_key": "abc-123",
     "correlation_id": "req-789"
   }'
 ```
 
-**Respuesta esperada (201):**
+**Response (201):**
 
 ```json
 {
@@ -250,13 +345,13 @@ curl -X POST http://localhost:3003/dev/orchestrator/create-and-confirm-order \
     "order": {
       "id": 101,
       "status": "CONFIRMED",
-      "total_cents": 459900,
+      "total_cents": 120000,
       "items": [
         {
           "product_id": 2,
           "qty": 3,
-          "unit_price_cents": 129900,
-          "subtotal_cents": 389700
+          "unit_price_cents": 40000,
+          "subtotal_cents": 120000
         }
       ]
     }
@@ -264,136 +359,26 @@ curl -X POST http://localhost:3003/dev/orchestrator/create-and-confirm-order \
 }
 ```
 
-## 🔧 Lambda Orchestrator - Desarrollo Local
+## 🧪 Tests
 
-### 1. Instalar dependencias
-
-```bash
-cd lambda-orchestrator
-npm install
-```
-
-### 2. Ejecutar en modo local con Serverless Offline
-
-```bash
-npm run dev
-```
-
-El Lambda estará disponible en: `http://localhost:3003/dev/orchestrator/create-and-confirm-order`
-
-### 3. Desplegar en AWS (opcional)
-
-```bash
-# Configurar credenciales AWS
-aws configure
-
-# Actualizar variables de entorno en serverless.yml con URLs públicas
-# CUSTOMERS_API_URL: https://your-customers-api.com
-# ORDERS_API_URL: https://your-orders-api.com
-
-# Desplegar
-npm run deploy
-```
-
-## 🗃️ Base de Datos
-
-### Schema
-
-Las tablas incluidas son:
-
-- `customers` - Clientes con email único
-- `products` - Productos con SKU único y control de stock
-- `orders` - Órdenes con estados (CREATED, CONFIRMED, CANCELED)
-- `order_items` - Items de cada orden con precios
-- `idempotency_keys` - Control de idempotencia para evitar duplicados
-
-### Datos de prueba
-
-El archivo `seed.sql` incluye:
-
-- 1 cliente de prueba (Empresa ACME)
-- 3 productos de ejemplo
-
-### Migraciones
-
-Las migraciones se ejecutan automáticamente al iniciar el contenedor de MySQL gracias a Docker Compose que monta `/db` en `/docker-entrypoint-initdb.d`.
-
-## 🔒 Autenticación
-
-### Endpoints Internos
-
-Los endpoints `/internal/*` requieren autenticación mediante token Bearer:
-
-```bash
-curl http://localhost:3001/internal/customers/1 \
-  -H "Authorization: Bearer token_secreto_interno_123"
-```
-
-### Idempotencia
-
-Los endpoints de confirmación y cancelación requieren el header `X-Idempotency-Key` para garantizar que operaciones duplicadas no causen efectos secundarios:
-
-```bash
-curl -X POST http://localhost:3002/orders/1/confirm \
-  -H "X-Idempotency-Key: unique-key-123"
-```
-
-Si se repite la misma petición con la misma key, se devolverá el mismo resultado sin volver a ejecutar la operación.
-
-## 📊 Estados de las Órdenes
-
-- **CREATED**: Orden creada, stock descontado
-- **CONFIRMED**: Orden confirmada
-- **CANCELED**: Orden cancelada, stock restaurado
-
-### Reglas de Cancelación
-
-- **CREATED**: Se puede cancelar siempre, restaura stock
-- **CONFIRMED**: Se puede cancelar solo dentro de 10 minutos desde su creación, restaura stock
-- Después de 10 minutos en CONFIRMED, no se puede cancelar
-
-## 🧪 Testing
-
-Para ejecutar las pruebas (si se implementan):
-
-```bash
-# En cada servicio
-npm test
-```
-
-## 🧪 Testing
+Cada servicio tiene su suite de tests con Jest:
 
 ### Ejecutar tests
 
-Cada API incluye tests unitarios y de integración con Jest.
-
-**Customers API:**
-
 ```bash
+# Customers API
 cd customers-api
-npm install
 npm test
-```
 
-**Orders API:**
-
-```bash
+# Orders API
 cd orders-api
-npm install
 npm test
 ```
 
-### Ver cobertura de tests
+### Cobertura de tests
 
-```bash
-npm test -- --coverage
-```
-
-### Tests en modo watch (desarrollo)
-
-```bash
-npm run test:watch
-```
+- **Customers API**: 11 tests - Cobertura: 82.69%
+- **Orders API**: 13 tests - Cobertura: 81.06%
 
 ### Tests incluidos
 
@@ -401,192 +386,229 @@ npm run test:watch
 
 - ✅ Health check
 - ✅ CRUD completo de clientes
-- ✅ Validaciones de datos
-- ✅ Paginación
-- ✅ Autenticación de endpoints internos
+- ✅ Búsqueda con paginación
+- ✅ Endpoint interno con autenticación
+- ✅ Validación de datos con Zod
 
 **Orders API:**
 
+- ✅ Health check
 - ✅ CRUD de productos
-- ✅ Creación de órdenes con validaciones
+- ✅ Creación de órdenes con validación de cliente
+- ✅ Control de stock transaccional
 - ✅ Confirmación idempotente
 - ✅ Cancelación con restauración de stock
-- ✅ Búsqueda con filtros
-- ✅ Validación de stock insuficiente
+- ✅ Filtros y paginación
 
-## 🔧 Scripts NPM Disponibles
-
-**Customers API / Orders API:**
-
-- `npm start` - Iniciar en producción
-- `npm run dev` - Iniciar con nodemon (desarrollo)
-
-**Lambda Orchestrator:**
-
-- `npm run dev` - Ejecutar con serverless-offline
-- `npm run deploy` - Desplegar a AWS
-
-## 📖 Documentación OpenAPI
-
-Cada API incluye su documentación OpenAPI 3.0:
-
-- Customers API: `/customers-api/openapi.yaml`
-- Orders API: `/orders-api/openapi.yaml`
-
-### 🎨 Visualizar documentación interactiva
-
-Ambas APIs incluyen **Swagger UI integrado** para probar los endpoints directamente desde el navegador:
-
-**Customers API:**
+## 📁 Estructura del Proyecto
 
 ```
-http://localhost:3001/api-docs
+Node Backend/
+├── customers-api/
+│   ├── src/
+│   │   ├── app.js              # Aplicación Express
+│   │   ├── config/
+│   │   │   └── db.js           # Configuración MySQL
+│   │   ├── controllers/
+│   │   │   └── customer.controller.js
+│   │   ├── middlewares/
+│   │   │   └── auth.middleware.js
+│   │   ├── models/
+│   │   │   └── customer.model.js
+│   │   └── routes/
+│   │       └── customer.routes.js
+│   ├── tests/
+│   │   ├── setup.js
+│   │   └── customers.test.js
+│   ├── scripts/
+│   │   ├── migrate.js
+│   │   └── seed.js
+│   ├── openapi.yaml
+│   ├── Dockerfile
+│   └── package.json
+│
+├── orders-api/
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── config/
+│   │   │   └── db.js
+│   │   ├── controllers/
+│   │   │   ├── order.controller.js
+│   │   │   └── product.controller.js
+│   │   ├── middlewares/
+│   │   │   └── idempotency.js
+│   │   ├── models/
+│   │   │   ├── order.model.js
+│   │   │   └── product.model.js
+│   │   ├── routes/
+│   │   │   ├── order.routes.js
+│   │   │   └── product.routes.js
+│   │   └── utils/
+│   │       └── apiClient.js
+│   ├── tests/
+│   │   ├── setup.js
+│   │   └── orders.test.js
+│   ├── scripts/
+│   │   ├── migrate.js
+│   │   └── seed.js
+│   ├── openapi.yaml
+│   ├── Dockerfile
+│   └── package.json
+│
+├── lambda-orchestrator/
+│   ├── handler.js              # Lambda handler
+│   ├── serverless.yml          # Configuración Serverless
+│   └── package.json
+│
+├── db/
+│   ├── schema.sql              # Esquema de base de datos
+│   └── seed.sql                # Datos iniciales
+│
+├── docker-compose.yml          # Orquestación de servicios
+└── README.md
 ```
 
-**Orders API:**
+## 🔐 Seguridad
+
+### Autenticación entre servicios
+
+Los servicios internos requieren un token Bearer:
 
 ```
-http://localhost:3002/api-docs
+Authorization: Bearer token_secreto_interno_123
 ```
 
-Desde la interfaz de Swagger UI puedes:
+### Variables de entorno sensibles
 
-- 📖 Ver toda la documentación de endpoints
-- 🧪 Probar los endpoints directamente
-- 📝 Ver ejemplos de request/response
-- 🔍 Explorar los esquemas de datos
+Para producción, configure:
 
-### Otras formas de visualizar
+- `SERVICE_TOKEN`: Token para comunicación entre servicios
+- `DB_PASS`: Contraseña de MySQL
+- `MYSQL_ROOT_PASSWORD`: Contraseña root de MySQL
 
-Puedes visualizarlas en [Swagger Editor](https://editor.swagger.io/) o importarlas en Postman/Insomnia.
+## 🎯 Características Implementadas
 
-## 🐳 Docker Compose
+### ✅ Gestión de Clientes
 
-### Servicios incluidos:
+- CRUD completo
+- Validación de datos con Zod
+- Email único
+- Endpoint interno protegido
 
-1. **db** - MySQL 8.0 (puerto 3306)
-2. **customers-api** - API de clientes (puerto 3001)
-3. **orders-api** - API de órdenes (puerto 3002)
+### ✅ Gestión de Productos
 
-### Comandos útiles:
+- CRUD completo
+- Control de stock
+- Actualización atómica de precio/stock
+
+### ✅ Gestión de Órdenes
+
+- Validación de cliente en Customers API
+- Verificación de stock disponible
+- Descuento transaccional de stock
+- Cálculo automático de totales
+- Estados: CREATED, CONFIRMED, CANCELED
+
+### ✅ Idempotencia
+
+- Header `X-Idempotency-Key` en confirmación de órdenes
+- Cache de respuestas para evitar duplicados
+- Respuesta consistente ante reintentos
+
+### ✅ Cancelación de Órdenes
+
+- CREATED: Cancela y restaura stock
+- CONFIRMED: Solo dentro de 10 minutos
+
+### ✅ Orquestación Lambda
+
+- Flujo completo: validar → crear → confirmar
+- Respuesta consolidada
+- Manejo de errores
+- Correlation ID para trazabilidad
+
+### ✅ Paginación
+
+- Cursor-based pagination
+- Parámetros: `cursor`, `limit`
+- Búsqueda con `search`
+
+### ✅ Documentación
+
+- OpenAPI 3.0
+- Swagger UI interactivo
+- Ejemplos de requests/responses
+
+## 🐛 Troubleshooting
+
+### El puerto 3001/3002/3003 ya está en uso
 
 ```bash
-# Iniciar servicios
-docker-compose up -d
+# Windows
+netstat -ano | findstr ":3001"
+taskkill /PID <PID> /F
 
-# Ver logs en tiempo real
-docker-compose logs -f
-
-# Ver logs de un servicio específico
-docker-compose logs -f customers-api
-
-# Detener servicios
-docker-compose down
-
-# Detener y eliminar volúmenes (limpieza completa)
-docker-compose down -v
-
-# Reconstruir imágenes
-docker-compose build --no-cache
-
-# Reiniciar un servicio específico
-docker-compose restart customers-api
-
-# Acceder a MySQL
-docker-compose exec db mysql -uroot -proot challenges_db
-
-# Ver estado de los servicios
-docker-compose ps
-```
-
-### Variables de entorno
-
-Todas las configuraciones se gestionan desde el archivo `.env` en la raíz del proyecto:
-
-```bash
-# .env
-MYSQL_ROOT_PASSWORD=root
-MYSQL_DATABASE=challenges_db
-CUSTOMERS_API_PORT=3001
-ORDERS_API_PORT=3002
-MYSQL_PORT=3306
-SERVICE_TOKEN=token_secreto_interno_123
-```
-
-Para cambiar configuraciones, edita el archivo `.env` y reinicia los servicios:
-
-```bash
-docker-compose down
-docker-compose up -d
-```
-
-## 🏗️ Arquitectura
-
-```
-┌─────────────┐
-│   Cliente   │
-│ (Postman/   │
-│  Insomnia)  │
-└──────┬──────┘
-       │
-       ▼
-┌──────────────────┐
-│     Lambda       │
-│  Orchestrator    │◄── Serverless Framework
-└────┬─────────┬───┘
-     │         │
-     ▼         ▼
-┌─────────┐ ┌─────────┐
-│Customers│ │ Orders  │
-│   API   │ │   API   │
-└────┬────┘ └────┬────┘
-     │           │
-     └─────┬─────┘
-           ▼
-      ┌─────────┐
-      │  MySQL  │
-      └─────────┘
-```
-
-## 📝 Características Técnicas
-
-- ✅ **Node.js 20** con Express
-- ✅ **Validación** con Zod
-- ✅ **SQL parametrizado** para prevenir SQL injection
-- ✅ **Transacciones** para operaciones críticas (stock)
-- ✅ **Idempotencia** con X-Idempotency-Key
-- ✅ **Paginación cursor-based** para escalabilidad
-- ✅ **Autenticación** con Bearer tokens para endpoints internos
-- ✅ **Docker Compose** para desarrollo local
-- ✅ **Serverless Framework** para Lambda
-- ✅ **OpenAPI 3.0** para documentación
-- ✅ **Códigos HTTP apropiados** (200, 201, 400, 404, 409, 500)
-
-## 🚨 Troubleshooting
-
-### Los contenedores no inician
-
-```bash
-docker-compose down -v
-docker-compose up -d
+# Linux/Mac
+lsof -ti:3001 | xargs kill -9
 ```
 
 ### Error de conexión a MySQL
 
-Espera a que MySQL esté completamente iniciado:
+Verifica que el contenedor esté corriendo:
 
 ```bash
-docker-compose logs db
+docker ps | grep mysql
 ```
 
-### Lambda no responde
+Reinicia los servicios:
 
-Verifica que las APIs estén corriendo y accesibles desde el Lambda.
+```bash
+docker-compose restart
+```
+
+### Tests fallan
+
+Asegúrate de que MySQL esté corriendo:
+
+```bash
+docker-compose up -d db
+```
+
+Ejecuta las migraciones:
+
+```bash
+cd customers-api
+npm run migrate
+```
+
+### Lambda Orchestrator no responde
+
+Verifica que las APIs estén corriendo:
+
+```bash
+curl http://localhost:3001/health
+curl http://localhost:3002/health
+```
+
+Revisa los logs:
+
+```bash
+cd lambda-orchestrator
+npm run dev
+```
+
+## 📝 Notas Importantes
+
+1. **Base de Datos Compartida**: Ambas APIs comparten la misma base de datos MySQL (`challenges_db`)
+2. **Transacciones**: Las órdenes usan transacciones para garantizar consistencia
+3. **Idempotencia**: Crucial para evitar órdenes duplicadas en reintentos
+4. **Stock**: Se descuenta al crear la orden, se restaura al cancelar
+5. **Validation**: Todos los endpoints validan datos con Zod
 
 ## 📄 Licencia
 
-MIT
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
-## 👥 Autor
+## 👥 Autores
 
-Tu nombre aquí
+- Joel Cuascota - [GitHub Profile](https://github.com/JACS002)
