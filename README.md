@@ -58,9 +58,17 @@ cd Node\ Backend
 
 ### 2. Configurar variables de entorno
 
-Cada servicio necesita un archivo `.env`. Los valores por defecto están en `docker-compose.yml`:
+**Para Docker Compose:**
 
-**Customers API:**
+Copia el archivo `.env.example` a `.env` en la raíz del proyecto:
+
+```bash
+cp .env.example .env
+```
+
+El archivo `.env` ya contiene los valores por defecto. Puedes modificarlos según tus necesidades.
+
+**Para Lambda Orchestrator (desarrollo local):**
 
 ```env
 PORT=3001
@@ -112,6 +120,10 @@ curl http://localhost:3001/health
 
 # Orders API
 curl http://localhost:3002/health
+
+# Ver documentación interactiva con Swagger UI
+# Customers API: http://localhost:3001/api-docs
+# Orders API: http://localhost:3002/api-docs
 ```
 
 ## 📡 APIs Disponibles
@@ -349,7 +361,60 @@ Para ejecutar las pruebas (si se implementan):
 npm test
 ```
 
-## 🛠️ Scripts NPM Disponibles
+## 🧪 Testing
+
+### Ejecutar tests
+
+Cada API incluye tests unitarios y de integración con Jest.
+
+**Customers API:**
+
+```bash
+cd customers-api
+npm install
+npm test
+```
+
+**Orders API:**
+
+```bash
+cd orders-api
+npm install
+npm test
+```
+
+### Ver cobertura de tests
+
+```bash
+npm test -- --coverage
+```
+
+### Tests en modo watch (desarrollo)
+
+```bash
+npm run test:watch
+```
+
+### Tests incluidos
+
+**Customers API:**
+
+- ✅ Health check
+- ✅ CRUD completo de clientes
+- ✅ Validaciones de datos
+- ✅ Paginación
+- ✅ Autenticación de endpoints internos
+
+**Orders API:**
+
+- ✅ CRUD de productos
+- ✅ Creación de órdenes con validaciones
+- ✅ Confirmación idempotente
+- ✅ Cancelación con restauración de stock
+- ✅ Búsqueda con filtros
+- ✅ Validación de stock insuficiente
+
+## 🔧 Scripts NPM Disponibles
 
 **Customers API / Orders API:**
 
@@ -368,6 +433,31 @@ Cada API incluye su documentación OpenAPI 3.0:
 - Customers API: `/customers-api/openapi.yaml`
 - Orders API: `/orders-api/openapi.yaml`
 
+### 🎨 Visualizar documentación interactiva
+
+Ambas APIs incluyen **Swagger UI integrado** para probar los endpoints directamente desde el navegador:
+
+**Customers API:**
+
+```
+http://localhost:3001/api-docs
+```
+
+**Orders API:**
+
+```
+http://localhost:3002/api-docs
+```
+
+Desde la interfaz de Swagger UI puedes:
+
+- 📖 Ver toda la documentación de endpoints
+- 🧪 Probar los endpoints directamente
+- 📝 Ver ejemplos de request/response
+- 🔍 Explorar los esquemas de datos
+
+### Otras formas de visualizar
+
 Puedes visualizarlas en [Swagger Editor](https://editor.swagger.io/) o importarlas en Postman/Insomnia.
 
 ## 🐳 Docker Compose
@@ -384,17 +474,50 @@ Puedes visualizarlas en [Swagger Editor](https://editor.swagger.io/) o importarl
 # Iniciar servicios
 docker-compose up -d
 
-# Ver logs
+# Ver logs en tiempo real
 docker-compose logs -f
+
+# Ver logs de un servicio específico
+docker-compose logs -f customers-api
 
 # Detener servicios
 docker-compose down
 
+# Detener y eliminar volúmenes (limpieza completa)
+docker-compose down -v
+
 # Reconstruir imágenes
 docker-compose build --no-cache
 
+# Reiniciar un servicio específico
+docker-compose restart customers-api
+
 # Acceder a MySQL
 docker-compose exec db mysql -uroot -proot challenges_db
+
+# Ver estado de los servicios
+docker-compose ps
+```
+
+### Variables de entorno
+
+Todas las configuraciones se gestionan desde el archivo `.env` en la raíz del proyecto:
+
+```bash
+# .env
+MYSQL_ROOT_PASSWORD=root
+MYSQL_DATABASE=challenges_db
+CUSTOMERS_API_PORT=3001
+ORDERS_API_PORT=3002
+MYSQL_PORT=3306
+SERVICE_TOKEN=token_secreto_interno_123
+```
+
+Para cambiar configuraciones, edita el archivo `.env` y reinicia los servicios:
+
+```bash
+docker-compose down
+docker-compose up -d
 ```
 
 ## 🏗️ Arquitectura

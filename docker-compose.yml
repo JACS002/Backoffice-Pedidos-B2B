@@ -7,10 +7,10 @@ services:
     container_name: challenges_db_container
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: challenges_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:3306"
     volumes:
       - ./db:/docker-entrypoint-initdb.d
       - db_data:/var/lib/mysql
@@ -26,14 +26,14 @@ services:
     build: ./customers-api
     container_name: customers_api_container
     ports:
-      - "3001:3001"
+      - "${CUSTOMERS_API_PORT}:${CUSTOMERS_API_PORT}"
     environment:
-      - PORT=3001
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASS=root
-      - DB_NAME=challenges_db
-      - SERVICE_TOKEN=token_secreto_interno_123
+      - PORT=${CUSTOMERS_API_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - SERVICE_TOKEN=${SERVICE_TOKEN}
     depends_on:
       db:
         condition: service_healthy
@@ -45,16 +45,16 @@ services:
     build: ./orders-api
     container_name: orders_api_container
     ports:
-      - "3002:3002"
+      - "${ORDERS_API_PORT}:${ORDERS_API_PORT}"
     environment:
-      - PORT=3002
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASS=root
-      - DB_NAME=challenges_db
-      - SERVICE_TOKEN=token_secreto_interno_123
+      - PORT=${ORDERS_API_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - SERVICE_TOKEN=${SERVICE_TOKEN}
       # URL interna para que Orders hable con Customers
-      - CUSTOMERS_API_URL=http://customers-api:3001
+      - CUSTOMERS_API_URL=${CUSTOMERS_API_URL}
     depends_on:
       db:
         condition: service_healthy
