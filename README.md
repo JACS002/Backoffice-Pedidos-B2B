@@ -20,31 +20,6 @@
 
 ---
 
-## 📑 Tabla de Contenidos
-
-- [📋 Descripción](#-descripción)
-- [🏗️ Arquitectura](#️-arquitectura)
-- [🛠️ Tecnologías](#️-tecnologías)
-- [📦 Requisitos Previos](#-requisitos-previos)
-- [🚀 Instalación](#-instalación)
-- [🐳 Ejecución con Docker](#-ejecución-con-docker)
-- [⚡ Ejecución Local (Lambda Orchestrator)](#-ejecución-local-lambda-orchestrator)
-- [📚 Documentación API](#-documentación-api)
-- [🔌 Endpoints](#-endpoints)
-  - [Customers API](#customers-api-puerto-3001)
-  - [Orders API](#orders-api-puerto-3002)
-  - [Lambda Orchestrator](#lambda-orchestrator-puerto-3003)
-- [🧪 Tests](#-tests)
-- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
-- [🔐 Seguridad](#-seguridad)
-- [🎯 Características Implementadas](#-características-implementadas)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [📝 Notas Importantes](#-notas-importantes)
-- [🤝 Contribuir](#-contribuir)
-- [📄 Licencia](#-licencia)
-
----
-
 ## 📋 Descripción
 
 Este proyecto implementa un sistema completo de e-commerce utilizando microservicios independientes:
