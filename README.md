@@ -394,8 +394,8 @@ npm test
 
 ### Cobertura de tests
 
-- **Customers API**: 11 tests - Cobertura: 82.69%
-- **Orders API**: 13 tests - Cobertura: 81.06%
+- **Customers API**: 11 tests
+- **Orders API**: 13 tests
 
 ### Tests incluidos
 
