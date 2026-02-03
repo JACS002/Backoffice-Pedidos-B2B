@@ -56,8 +56,7 @@ Este proyecto implementa un sistema completo de e-commerce utilizando microservi
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <repository-url>
-cd "Node Backend"
+git clone https://github.com/JACS002/Backoffice-Pedidos-B2B
 ```
 
 ### 2. Instalar dependencias
