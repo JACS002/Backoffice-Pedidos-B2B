@@ -1,6 +1,49 @@
+<div align="center">
+
 # 🚀 Backoffice de Pedidos B2B
 
-Sistema de microservicios con arquitectura RESTful para gestión de clientes, productos y órdenes, con orquestación mediante AWS Lambda.
+### Sistema de Microservicios con Arquitectura RESTful
+
+[![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+
+[![Serverless](https://img.shields.io/badge/Serverless-Framework-FD5750?style=for-the-badge&logo=serverless&logoColor=white)](https://www.serverless.com/)
+[![Jest](https://img.shields.io/badge/Jest-Testing-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)](https://www.openapis.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](./LICENSE)
+
+[Documentación API](#-documentación-api) • [Instalación](#-instalación) • [Endpoints](#-endpoints) • [Tests](#-tests)
+
+</div>
+
+---
+
+## 📑 Tabla de Contenidos
+
+- [📋 Descripción](#-descripción)
+- [🏗️ Arquitectura](#️-arquitectura)
+- [🛠️ Tecnologías](#️-tecnologías)
+- [📦 Requisitos Previos](#-requisitos-previos)
+- [🚀 Instalación](#-instalación)
+- [🐳 Ejecución con Docker](#-ejecución-con-docker)
+- [⚡ Ejecución Local (Lambda Orchestrator)](#-ejecución-local-lambda-orchestrator)
+- [📚 Documentación API](#-documentación-api)
+- [🔌 Endpoints](#-endpoints)
+  - [Customers API](#customers-api-puerto-3001)
+  - [Orders API](#orders-api-puerto-3002)
+  - [Lambda Orchestrator](#lambda-orchestrator-puerto-3003)
+- [🧪 Tests](#-tests)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🔐 Seguridad](#-seguridad)
+- [🎯 Características Implementadas](#-características-implementadas)
+- [🐛 Troubleshooting](#-troubleshooting)
+- [📝 Notas Importantes](#-notas-importantes)
+- [🤝 Contribuir](#-contribuir)
+- [📄 Licencia](#-licencia)
+
+---
 
 ## 📋 Descripción
 
