@@ -29,8 +29,14 @@ app.get("/health", (req, res) => res.send("Customers API OK"));
 // Rutas de clientes
 app.use(customerRoutes);
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Customers API corriendo en puerto ${PORT}`);
-  console.log(`Documentación disponible en: http://localhost:${PORT}/api-docs`);
-});
+module.exports = app;
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Customers API corriendo en puerto ${PORT}`);
+    console.log(
+      `Documentación disponible en: http://localhost:${PORT}/api-docs`,
+    );
+  });
+}

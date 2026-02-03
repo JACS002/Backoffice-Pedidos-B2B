@@ -42,13 +42,65 @@ paths:
           name: search
           schema:
             type: string
+          description: Búsqueda por nombre o SKU
+        - in: query
+          name: cursor
+          schema:
+            type: string
+          description: Cursor para paginación
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Cantidad de resultados por página
       responses:
         "200":
           description: Lista de productos
 
+  /products/{id}:
+    get:
+      summary: Obtener producto por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Detalle del producto
+        "404":
+          description: Producto no encontrado
+    patch:
+      summary: Actualizar producto (precio/stock)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price_cents:
+                  type: integer
+                  description: Nuevo precio en centavos
+                stock:
+                  type: integer
+                  description: Nuevo stock disponible
+      responses:
+        "200":
+          description: Producto actualizado
+        "404":
+          description: Producto no encontrado
+
   /orders:
     post:
       summary: Crear Orden (Transaction)
+      description: Valida cliente en Customers API (/internal), verifica stock, crea orden con status CREATED y descuenta stock en transacción
       requestBody:
         content:
           application/json:
@@ -69,10 +121,46 @@ paths:
       responses:
         "201":
           description: Orden creada (Status CREATED)
+        "400":
+          description: Cliente inválido o stock insuficiente
+    get:
+      summary: Listar órdenes con filtros
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: Filtrar por estado (CREATED, CONFIRMED, CANCELLED)
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          description: Fecha desde
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+          description: Fecha hasta
+        - in: query
+          name: cursor
+          schema:
+            type: string
+          description: Cursor para paginación
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Cantidad de resultados por página
+      responses:
+        "200":
+          description: Lista de órdenes
 
   /orders/{id}:
     get:
       summary: Obtener orden por ID
+      description: Devuelve el detalle completo de la orden incluyendo los items
       parameters:
         - in: path
           name: id
@@ -82,10 +170,13 @@ paths:
       responses:
         "200":
           description: Detalle de orden con items
+        "404":
+          description: Orden no encontrada
 
   /orders/{id}/confirm:
     post:
       summary: Confirmar Orden (Idempotente)
+      description: Cambia el estado de la orden a CONFIRMED. Es idempotente mediante X-Idempotency-Key, devuelve el mismo resultado si se repite la misma clave
       parameters:
         - in: path
           name: id
@@ -101,10 +192,15 @@ paths:
       responses:
         "200":
           description: Orden confirmada (o respuesta cacheada si se repite key)
+        "400":
+          description: Orden ya confirmada o en estado inválido
+        "404":
+          description: Orden no encontrada
 
   /orders/{id}/cancel:
     post:
       summary: Cancelar Orden
+      description: Si está en CREATED cancela y restaura stock. Si está en CONFIRMED solo cancela dentro de 10 minutos desde la confirmación
       parameters:
         - in: path
           name: id
@@ -113,4 +209,8 @@ paths:
             type: integer
       responses:
         "200":
-          description: Orden cancelada y stock restaurado
+          description: Orden cancelada y stock restaurado (si aplica)
+        "400":
+          description: No se puede cancelar (tiempo excedido o estado inválido)
+        "404":
+          description: Orden no encontrada

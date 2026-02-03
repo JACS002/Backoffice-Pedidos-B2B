@@ -24,6 +24,10 @@ describe("Customers API - CRUD Operations", () => {
       .send(newCustomer)
       .set("Content-Type", "application/json");
 
+    if (response.status !== 201) {
+      console.log("Error response:", response.body);
+    }
+
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("id");
     expect(response.body.name).toBe(newCustomer.name);
