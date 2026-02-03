@@ -31,8 +31,15 @@ app.get("/health", (req, res) => res.send("Orders API OK"));
 app.use(productRoutes);
 app.use(orderRoutes);
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-  console.log(`Orders API corriendo en puerto ${PORT}`);
-  console.log(`Documentación disponible en: http://localhost:${PORT}/api-docs`);
-});
+module.exports = app;
+
+// Solo iniciar el servidor si este archivo es ejecutado directamente
+if (require.main === module) {
+  const PORT = process.env.PORT || 3002;
+  app.listen(PORT, () => {
+    console.log(`Orders API corriendo en puerto ${PORT}`);
+    console.log(
+      `Documentación disponible en: http://localhost:${PORT}/api-docs`,
+    );
+  });
+}
