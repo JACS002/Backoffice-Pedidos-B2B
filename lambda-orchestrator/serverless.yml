@@ -1,0 +1,29 @@
+service: lambda-orchestrator
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    # En local (docker), usamos localhost. En AWS, serían las URLs públicas.
+    CUSTOMERS_API_URL: ${env:CUSTOMERS_API_URL, 'http://localhost:3001'}
+    ORDERS_API_URL: ${env:ORDERS_API_URL, 'http://localhost:3002'}
+    SERVICE_TOKEN: ${env:SERVICE_TOKEN, 'token_secreto_interno_123'}
+
+functions:
+  createAndConfirmOrder:
+    handler: handler.createAndConfirmOrder
+    events:
+      - http:
+          path: /orchestrator/create-and-confirm-order
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3003
+    lambdaPort: 3004
